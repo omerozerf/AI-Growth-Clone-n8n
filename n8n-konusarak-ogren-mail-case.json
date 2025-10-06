@@ -2,13 +2,19 @@
   "name": "KonusarakOgren - Email Automation",
   "nodes": [
     {
-      "parameters": { "mode": "everyDay", "hour": 10, "minute": 0 },
+      "parameters": {
+        "mode": "everyDay",
+        "hour": 10,
+        "minute": 0
+      },
       "id": "cron-10am",
       "name": "Daily Trigger 10:00",
       "type": "n8n-nodes-base.cron",
       "typeVersion": 1,
-      "disabled": true,
-      "position": [-1080, 80]
+      "position": [
+        -1080,
+        80
+      ]
     },
     {
       "parameters": {
@@ -22,85 +28,336 @@
       "name": "Fetch Leads",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 3,
-      "position": [-840, 80],
+      "position": [
+        -840,
+        80
+      ],
       "credentials": {
-        "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_SHEETS_CRED_ID", "name": "Google Sheets account" }
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
       }
     },
     {
       "parameters": {
-        "functionCode": "\n// Expect header row: Name | Email | Status | LastContact\nconst rows = $json.data || [];\nconst out = [];\nfor (let i = 1; i < rows.length; i++) {\n  const r = rows[i];\n  out.push({ json: { Name: r[0]||'', Email: r[1]||'', Status: r[2]||'', LastContact: r[3]||'' } });\n}\nreturn out;\n"
+        "functionCode": "\n// Expect header row: Name | Email | Status | LastContact\nconst rows = $json.data || [];\nconst out = [];\nfor (let i = 1; i < rows.length; i++) {\n  const r = rows[i];\n  out.push({\n    json: {\n      Name: r[0] || '',\n      Email: r[1] || '',\n      Status: r[2] || '',\n      LastContact: r[3] || ''\n    }\n  });\n}\nreturn out;\n"
       },
       "id": "fn-normalize",
       "name": "Normalize Leads",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
-      "position": [-620, 80]
+      "position": [
+        -620,
+        80
+      ]
     },
     {
       "parameters": {
         "propertyName": "Status",
         "dataType": "string",
         "rules": [
-          { "operation": "equal", "value": "TrialNotPurchased" },
-          { "operation": "equal", "value": "FormNoTrial" }
+          {
+            "operation": "equal",
+            "value": "TrialNotPurchased"
+          },
+          {
+            "operation": "equal",
+            "value": "FormNoTrial"
+          }
         ]
       },
       "id": "switch-status",
       "name": "Segment by Status",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 2,
-      "position": [-400, 80]
+      "position": [
+        -400,
+        80
+      ]
     },
     {
       "parameters": {
         "keepOnlySet": false,
-        "values": { "string": [{ "name": "messageType", "value": "Day0_TrialNotPurchased" }] }
+        "values": {
+          "string": [
+            {
+              "name": "messageType",
+              "value": "Day0_TrialNotPurchased"
+            }
+          ]
+        }
       },
       "id": "set-type-trial",
       "name": "Set Type: TrialNotPurchased",
       "type": "n8n-nodes-base.set",
       "typeVersion": 2,
-      "position": [-180, -40]
+      "position": [
+        -180,
+        -40
+      ]
     },
     {
       "parameters": {
         "keepOnlySet": false,
-        "values": { "string": [{ "name": "messageType", "value": "Day0_FormNoTrial" }] }
+        "values": {
+          "string": [
+            {
+              "name": "messageType",
+              "value": "Day0_FormNoTrial"
+            }
+          ]
+        }
       },
       "id": "set-type-form",
       "name": "Set Type: FormNoTrial",
       "type": "n8n-nodes-base.set",
       "typeVersion": 2,
-      "position": [-180, 80]
+      "position": [
+        -180,
+        80
+      ]
     },
     {
       "parameters": {
         "keepOnlySet": false,
-        "values": { "string": [{ "name": "messageType", "value": "Day0_Other" }] }
+        "values": {
+          "string": [
+            {
+              "name": "messageType",
+              "value": "Day0_Other"
+            }
+          ]
+        }
       },
       "id": "set-type-default",
       "name": "Set Type: Default",
       "type": "n8n-nodes-base.set",
       "typeVersion": 2,
-      "position": [-180, 200]
-    }
-  ],
-  "connections": {
-    "Daily Trigger 10:00": { "main": [[{ "node": "Fetch Leads", "type": "main", "index": 0 }]] },
-    "Fetch Leads": { "main": [[{ "node": "Normalize Leads", "type": "main", "index": 0 }]] },
-    "Normalize Leads": { "main": [[{ "node": "Segment by Status", "type": "main", "index": 0 }]] },
-    "Segment by Status": {
-      "main": [
-        [{ "node": "Set Type: TrialNotPurchased", "type": "main", "index": 0 }],
-        [{ "node": "Set Type: FormNoTrial", "type": "main", "index": 0 }],
-        [{ "node": "Set Type: Default", "type": "main", "index": 0 }]
+      "position": [
+        -180,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "\nconst name = $json.Name || '';\nconst email = $json.Email || '';\nconst messageType = $json.messageType || 'Day0_Other';\nconst mid = (Math.random().toString(36).slice(2) + Date.now().toString(36)).slice(0, 16);\nconst host = 'https://your-n8n-host';\nconst targetUrl = 'https://konusarakogren.com/?utm_source=email&utm_medium=automation&utm_campaign=ai-growth';\nconst openPixel = `${host}/webhook/open?mid=${mid}&email=${encodeURIComponent(email)}&type=${encodeURIComponent(messageType)}`;\nconst clickUrl = `${host}/webhook/click?mid=${mid}&email=${encodeURIComponent(email)}&type=${encodeURIComponent(messageType)}&url=${encodeURIComponent(targetUrl)}`;\nreturn { json: { ...$json, trackingId: mid, openPixel, clickUrl } };\n"
+      },
+      "id": "fn-tracking",
+      "name": "Build Tracking URLs",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        20,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "prompt": "=Aşağıdaki bilgilerle Türkçe, kısa (80-120 kelime) ve tek bir CTA içeren HTML e-posta içeriği ve konu üret. Çıktıyı JSON olarak {subject, html} döndür.\n\nSegment: {{$json.messageType}}\nAlıcı Adı: {{$json.Name}}\nTıklama URL'si: {{$json.clickUrl}}\n"
+      },
+      "id": "ai-generate",
+      "name": "AI: Generate Subject & Body",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        240,
+        80
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CRED_ID",
+          "name": "[UPDATE ME]"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "\nlet data = $json;\nif (data.data && typeof data.data === 'object') data = data.data;\nconst subject = data.subject || 'Teklifimiz Hakkında';\nlet html = (data.html || '').replace('{{ $json.clickUrl }}', $json.clickUrl);\nhtml += `<img src=\"${$json.openPixel}\" width=\"1\" height=\"1\" style=\"display:none;\" />`;\nreturn { json: { ...$json, subject, html } };\n"
+      },
+      "id": "fn-merge",
+      "name": "Merge AI + Tracking",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        480,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "to": "={{$json.Email}}",
+        "subject": "={{$json.subject}}",
+        "text": "",
+        "html": "={{$json.html}}",
+        "additionalFields": {}
+      },
+      "id": "gmail-day0",
+      "name": "Send Email - Day 0",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        720,
+        80
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CRED_ID",
+          "name": "Gmail OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "your_google_sheet_id",
+        "range": "EmailLogs!A:D",
+        "options": {
+          "valueInputMode": "RAW"
+        }
+      },
+      "id": "gs-log-day0",
+      "name": "Log Email Day 0",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        960,
+        80
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "unit": "days",
+        "amount": 2
+      },
+      "id": "wait-2d",
+      "name": "Wait 2 Days",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [
+            {
+              "name": "messageType",
+              "value": "Day2_FollowUp"
+            }
+          ]
+        }
+      },
+      "id": "set-day2",
+      "name": "Set Type: Day 2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        30
+      ]
+    },
+    {
+      "parameters": {
+        "prompt": "=Aşağıdaki bilgilerle Türkçe, 60-100 kelimelik tek CTA içeren HTML e-posta ve konu üret. JSON {subject, html} döndür.\nSegment: {{$json.messageType}}\nAlıcı Adı: {{$json.Name}}\nTıklama URL'si: {{$json.clickUrl}}\n"
+      },
+      "id": "ai-day2",
+      "name": "AI: Day 2 Content",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        30
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CRED_ID",
+          "name": "[UPDATE ME]"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "\nlet data = $json;\nif (data.data && typeof data.data === 'object') data = data.data;\nconst subject = data.subject || 'Güncelleme';\nlet html = (data.html || '').replace('{{ $json.clickUrl }}', $json.clickUrl);\nhtml += `<img src=\"${$json.openPixel}\" width=\"1\" height=\"1\" style=\"display:none;\" />`;\nreturn { json: { ...$json, subject, html } };\n"
+      },
+      "id": "fn-merge-day2",
+      "name": "Merge Day 2",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        30
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "to": "={{$json.Email}}",
+        "subject": "={{$json.subject}}",
+        "text": "",
+        "html": "={{$json.html}}",
+        "additionalFields": {}
+      },
+      "id": "gmail-day2",
+      "name": "Send Email - Day 2",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        30
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CRED_ID",
+          "name": "Gmail OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "your_google_sheet_id",
+        "range": "EmailLogs!A:D",
+        "options": {
+          "valueInputMode": "RAW"
+        }
+      },
+      "id": "gs-log-day2",
+      "name": "Log Email Day 2",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        2400,
+        30
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "unit": "days",
+        "amount": 3
+      },
+      "id": "wait-3d",
+      "name": "Wait 3 More Days",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        30
       ]
     }
-  },
-  "settings": { "executionOrder": "v1" },
-  "versionId": "v1.0-2025-10-06-baseline",
-  "meta": { "instanceId": "generated-demo" },
-  "id": "KonusarakOgrenEmailAutomation-v1_0",
-  "tags": []
-}
