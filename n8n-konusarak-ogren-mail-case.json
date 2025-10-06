@@ -1,0 +1,106 @@
+{
+  "name": "KonusarakOgren - Email Automation",
+  "nodes": [
+    {
+      "parameters": { "mode": "everyDay", "hour": 10, "minute": 0 },
+      "id": "cron-10am",
+      "name": "Daily Trigger 10:00",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "disabled": true,
+      "position": [-1080, 80]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "authentication": "oAuth2",
+        "sheetId": "your_google_sheet_id",
+        "range": "Leads!A:D",
+        "options": {}
+      },
+      "id": "gs-fetch-leads",
+      "name": "Fetch Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [-840, 80],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_SHEETS_CRED_ID", "name": "Google Sheets account" }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "\n// Expect header row: Name | Email | Status | LastContact\nconst rows = $json.data || [];\nconst out = [];\nfor (let i = 1; i < rows.length; i++) {\n  const r = rows[i];\n  out.push({ json: { Name: r[0]||'', Email: r[1]||'', Status: r[2]||'', LastContact: r[3]||'' } });\n}\nreturn out;\n"
+      },
+      "id": "fn-normalize",
+      "name": "Normalize Leads",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [-620, 80]
+    },
+    {
+      "parameters": {
+        "propertyName": "Status",
+        "dataType": "string",
+        "rules": [
+          { "operation": "equal", "value": "TrialNotPurchased" },
+          { "operation": "equal", "value": "FormNoTrial" }
+        ]
+      },
+      "id": "switch-status",
+      "name": "Segment by Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [-400, 80]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": false,
+        "values": { "string": [{ "name": "messageType", "value": "Day0_TrialNotPurchased" }] }
+      },
+      "id": "set-type-trial",
+      "name": "Set Type: TrialNotPurchased",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [-180, -40]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": false,
+        "values": { "string": [{ "name": "messageType", "value": "Day0_FormNoTrial" }] }
+      },
+      "id": "set-type-form",
+      "name": "Set Type: FormNoTrial",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [-180, 80]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": false,
+        "values": { "string": [{ "name": "messageType", "value": "Day0_Other" }] }
+      },
+      "id": "set-type-default",
+      "name": "Set Type: Default",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [-180, 200]
+    }
+  ],
+  "connections": {
+    "Daily Trigger 10:00": { "main": [[{ "node": "Fetch Leads", "type": "main", "index": 0 }]] },
+    "Fetch Leads": { "main": [[{ "node": "Normalize Leads", "type": "main", "index": 0 }]] },
+    "Normalize Leads": { "main": [[{ "node": "Segment by Status", "type": "main", "index": 0 }]] },
+    "Segment by Status": {
+      "main": [
+        [{ "node": "Set Type: TrialNotPurchased", "type": "main", "index": 0 }],
+        [{ "node": "Set Type: FormNoTrial", "type": "main", "index": 0 }],
+        [{ "node": "Set Type: Default", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "versionId": "v1.0-2025-10-06-baseline",
+  "meta": { "instanceId": "generated-demo" },
+  "id": "KonusarakOgrenEmailAutomation-v1_0",
+  "tags": []
+}
