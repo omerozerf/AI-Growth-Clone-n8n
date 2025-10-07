@@ -360,4 +360,404 @@
         2640,
         30
       ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [
+            {
+              "name": "messageType",
+              "value": "Day5_FollowUp"
+            }
+          ]
+        }
+      },
+      "id": "set-day5",
+      "name": "Set Type: Day 5",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        2880,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "prompt": "=Aşağıdaki bilgilerle Türkçe, 50-90 kelimelik tek CTA içeren HTML e-posta ve konu üret. JSON {subject, html} döndür.\nSegment: {{$json.messageType}}\nAlıcı Adı: {{$json.Name}}\nTıklama URL'si: {{$json.clickUrl}}\n"
+      },
+      "id": "ai-day5",
+      "name": "AI: Day 5 Content",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        3120,
+        -30
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CRED_ID",
+          "name": "[UPDATE ME]"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "\nlet data = $json;\nif (data.data && typeof data.data === 'object') data = data.data;\nconst subject = data.subject || 'Son Hatırlatma';\nlet html = (data.html || '').replace('{{ $json.clickUrl }}', $json.clickUrl);\nhtml += `<img src=\"${$json.openPixel}\" width=\"1\" height=\"1\" style=\"display:none;\" />`;\nreturn { json: { ...$json, subject, html } };\n"
+      },
+      "id": "fn-merge-day5",
+      "name": "Merge Day 5",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        3360,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "to": "={{$json.Email}}",
+        "subject": "={{$json.subject}}",
+        "text": "",
+        "html": "={{$json.html}}",
+        "additionalFields": {}
+      },
+      "id": "gmail-day5",
+      "name": "Send Email - Day 5",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        3600,
+        -30
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CRED_ID",
+          "name": "Gmail OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "your_google_sheet_id",
+        "range": "EmailLogs!A:D",
+        "options": {
+          "valueInputMode": "RAW"
+        }
+      },
+      "id": "gs-log-day5",
+      "name": "Log Email Day 5",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        3840,
+        -30
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "open",
+        "responseMode": "onReceived"
+      },
+      "id": "wh-open",
+      "name": "Webhook - Open",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "\nconst q = $json.query || {};\nreturn { json: { ts: new Date().toISOString(), email: q.email || '', trackingId: q.mid || '', messageType: q.type || '' } };\n"
+      },
+      "id": "fn-open-parse",
+      "name": "Parse Open Query",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "your_google_sheet_id",
+        "range": "OpenLogs!A:D",
+        "options": {
+          "valueInputMode": "RAW"
+        }
+      },
+      "id": "gs-open-log",
+      "name": "Log Open",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        60,
+        520
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseBody": "GIF89a",
+        "responseCode": 200,
+        "responseHeaders": {
+          "entries": [
+            {
+              "name": "Content-Type",
+              "value": "image/gif"
+            }
+          ]
+        }
+      },
+      "id": "respond-open",
+      "name": "Respond (1x1 gif)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        300,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "click",
+        "responseMode": "onReceived"
+      },
+      "id": "wh-click",
+      "name": "Webhook - Click",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "\nconst q = $json.query || {};\nreturn { json: { ts: new Date().toISOString(), email: q.email || '', trackingId: q.mid || '', messageType: q.type || '', url: q.url || '' } };\n"
+      },
+      "id": "fn-click-parse",
+      "name": "Parse Click Query",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "your_google_sheet_id",
+        "range": "ClickLogs!A:E",
+        "options": {
+          "valueInputMode": "RAW"
+        }
+      },
+      "id": "gs-click-log",
+      "name": "Log Click",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        60,
+        780
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseCode": 302,
+        "responseHeaders": {
+          "entries": [
+            {
+              "name": "Location",
+              "value": "={{$json.url}}"
+            }
+          ]
+        }
+      },
+      "id": "respond-click-redirect",
+      "name": "Respond Redirect",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        300,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "authentication": "oAuth2",
+        "sheetId": "your_google_sheet_id",
+        "range": "EmailLogs!A:D",
+        "options": {}
+      },
+      "id": "gs-get-emaillogs",
+      "name": "Get Email Logs",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        -240,
+        1160
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "authentication": "oAuth2",
+        "sheetId": "your_google_sheet_id",
+        "range": "ClickLogs!A:E",
+        "options": {}
+      },
+      "id": "gs-get-clicklogs",
+      "name": "Get Click Logs",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        200,
+        1200
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "\nconst emails = $items('Get Email Logs')[0].json.data || [];\nconst clicks = $items('Get Click Logs')[0].json.data || [];\nconst map = {};\nfor (let i = 1; i < emails.length; i++) {\n  const row = emails[i];\n  const type = row[3] || 'Unknown';\n  map[type] = map[type] || { sent: 0, clicks: 0 };\n  map[type].sent += 1;\n}\nfor (let i = 1; i < clicks.length; i++) {\n  const row = clicks[i];\n  const type = row[3] || 'Unknown';\n  map[type] = map[type] || { sent: 0, clicks: 0 };\n  map[type].clicks += 1;\n}\nconst results = Object.entries(map).map(([message, v]) => ({\n  message, sent: v.sent, clicks: v.clicks,\n  click_rate_percent: v.sent ? ((v.clicks/v.sent)*100).toFixed(2) : '0.00'\n}));\nlet best = null;\nfor (const r of results) if (!best || parseFloat(r.click_rate_percent) > parseFloat(best.click_rate_percent)) best = r;\nreturn results.map(r => ({ json: r })).concat([{ json: { best_message: best?.message || 'N/A', best_rate: best?.click_rate_percent || '0.00' } }]);\n"
+      },
+      "id": "fn-calc-stats",
+      "name": "Calculate Stats (by messageType)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        520,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "your_google_sheet_id",
+        "range": "Report!A:D",
+        "options": {}
+      },
+      "id": "gs-append-report",
+      "name": "Append Report",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        820,
+        1120
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daily Trigger 10:00": {
+      "main": [
+        [
+          {
+            "node": "Fetch Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Leads": {
+      "main": [
+        [
+          {
+            "node": "Normalize Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Leads": {
+      "main": [
+        [
+          {
+            "node": "Segment by Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Segment by Status": {
+      "main": [
+        [
+          {
+            "node": "Set Type: TrialNotPurchased",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Type: FormNoTrial",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Type: Default",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Type: TrialNotPurchased": {
+      "main": [
+        [
+          {
+            "node": "Build Tracking URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
