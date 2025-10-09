@@ -760,4 +760,313 @@
           }
         ]
       ]
+    },
+    "Set Type: FormNoTrial": {
+      "main": [
+        [
+          {
+            "node": "Build Tracking URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Type: Default": {
+      "main": [
+        [
+          {
+            "node": "Build Tracking URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Tracking URLs": {
+      "main": [
+        [
+          {
+            "node": "AI: Generate Subject & Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Generate Subject & Body": {
+      "main": [
+        [
+          {
+            "node": "Merge AI + Tracking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge AI + Tracking": {
+      "main": [
+        [
+          {
+            "node": "Send Email - Day 0",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email - Day 0": {
+      "main": [
+        [
+          {
+            "node": "Log Email Day 0",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Email Day 0": {
+      "main": [
+        [
+          {
+            "node": "Wait 2 Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2 Days": {
+      "main": [
+        [
+          {
+            "node": "Set Type: Day 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Type: Day 2": {
+      "main": [
+        [
+          {
+            "node": "AI: Day 2 Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Day 2 Content": {
+      "main": [
+        [
+          {
+            "node": "Merge Day 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Day 2": {
+      "main": [
+        [
+          {
+            "node": "Send Email - Day 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email - Day 2": {
+      "main": [
+        [
+          {
+            "node": "Log Email Day 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Email Day 2": {
+      "main": [
+        [
+          {
+            "node": "Wait 3 More Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 3 More Days": {
+      "main": [
+        [
+          {
+            "node": "Set Type: Day 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Type: Day 5": {
+      "main": [
+        [
+          {
+            "node": "AI: Day 5 Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Day 5 Content": {
+      "main": [
+        [
+          {
+            "node": "Merge Day 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Day 5": {
+      "main": [
+        [
+          {
+            "node": "Send Email - Day 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email - Day 5": {
+      "main": [
+        [
+          {
+            "node": "Log Email Day 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Open": {
+      "main": [
+        [
+          {
+            "node": "Parse Open Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Open Query": {
+      "main": [
+        [
+          {
+            "node": "Log Open",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Open": {
+      "main": [
+        [
+          {
+            "node": "Respond (1x1 gif)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Click": {
+      "main": [
+        [
+          {
+            "node": "Parse Click Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Click Query": {
+      "main": [
+        [
+          {
+            "node": "Log Click",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Click": {
+      "main": [
+        [
+          {
+            "node": "Respond Redirect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Email Logs": {
+      "main": [
+        [
+          {
+            "node": "Calculate Stats (by messageType)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Click Logs": {
+      "main": [
+        [
+          {
+            "node": "Calculate Stats (by messageType)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Stats (by messageType)": {
+      "main": [
+        [
+          {
+            "node": "Append Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "v1-2025-10-06-fix",
+  "meta": {
+    "instanceId": "generated-demo"
+  },
+  "id": "KonusarakOgrenEmailAutomationFixed",
+  "tags": []
+}
