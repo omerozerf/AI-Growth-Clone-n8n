@@ -1,150 +1,151 @@
 # 📧 Konuşarak Öğren - Email Automation
 
-Bu proje, **AI Growth Stajı Ön Çalışması** kapsamında geliştirilen, **Konuşarak Öğren** için tasarlanmış otomatik e-posta takip sistemidir. Sistem tamamen **n8n**, **Google Sheets**, **Gmail** ve **OpenAI** entegrasyonları ile oluşturulmuştur.
+This project is an **AI Growth Internship Pre-Study** developed for **Konuşarak Öğren**, designed as an automated email follow-up system.  
+The system is built entirely with **n8n**, **Google Sheets**, **Gmail**, and **OpenAI** integrations.
 
 ---
 
-## 🚀 Genel Amaç
+## 🚀 General Purpose
 
-Potansiyel müşterilere yönelik takip e-postalarını manuel hazırlama sürecini otomatikleştirmek, e-posta performansını izlemek ve raporlamak.  
-Amaç, **email hazırlama süresini %80 azaltmak**, **takip sürecinde tutarlılık sağlamak** ve **dönüşüm oranlarını %15-20 artırmak**.
+To automate the manual process of preparing follow-up emails for potential customers, monitor email performance, and generate reports.  
+The goals are to **reduce email preparation time by 80%**, **ensure consistency in the follow-up process**, and **increase conversion rates by 15–20%**.
 
 ---
 
-## ⚙️ Akış Özeti
+## ⚙️ Flow Summary
 
-### **1️⃣ Günlük Tetikleme**
-- `Daily Trigger 10:00`: Her sabah saat 10:00’da çalışır.
+### **1️⃣ Daily Trigger**
+- `Daily Trigger 10:00`: Runs every morning at 10:00 AM.
 
-### **2️⃣ Veri Alma**
-- `Fetch Leads`: Google Sheets’ten `Leads!A:D` aralığındaki verileri çeker.  
-  > 🟨 **Not:** `your_google_sheet_id` kısmını kendi Google Sheet ID’nizle değiştirin.
+### **2️⃣ Data Fetching**
+- `Fetch Leads`: Retrieves data from the `Leads!A:D` range in Google Sheets.  
+  > 🟨 **Note:** Replace `your_google_sheet_id` with your own Google Sheet ID.
 
-### **3️⃣ Veri Hazırlama**
-- `Normalize Leads`: Satır verilerini Name, Email, Status, LastContact formatına dönüştürür.
-- `Segment by Status`: Kullanıcıları statülerine göre ayırır:
+### **3️⃣ Data Preparation**
+- `Normalize Leads`: Converts row data into Name, Email, Status, and LastContact format.  
+- `Segment by Status`: Segregates users based on their status:
   - `TrialNotPurchased`
   - `FormNoTrial`
   - `Other`
 
-### **4️⃣ Email Tipi Atama**
+### **4️⃣ Email Type Assignment**
 - `Set Type: TrialNotPurchased`
 - `Set Type: FormNoTrial`
 - `Set Type: Default`
 
-### **5️⃣ Takip Linki Oluşturma**
-- `Build Tracking URLs`: Her alıcı için benzersiz takip ID’si (`trackingId`), açılma pikseli (`openPixel`) ve tıklama linki (`clickUrl`) oluşturur.  
-  > 🟨 **Not:** `https://your-n8n-host` kısmını kendi n8n host adresinizle değiştirin.
+### **5️⃣ Tracking Link Generation**
+- `Build Tracking URLs`: Generates a unique tracking ID (`trackingId`), open pixel (`openPixel`), and click URL (`clickUrl`) for each recipient.  
+  > 🟨 **Note:** Replace `https://your-n8n-host` with your own n8n host address.
 
-### **6️⃣ AI ile İçerik Üretimi**
-- `AI: Generate Subject & Body`: OpenAI API ile Türkçe, 80–120 kelimelik HTML formatında e-posta ve konu başlığı üretir.
-- `Merge AI + Tracking`: Takip linklerini HTML içeriğine ekler.
-- `Send Email - Day 0`: Gmail üzerinden e-posta gönderir.
-- `Log Email Day 0`: Gönderim bilgilerini `EmailLogs!A:D` sayfasına yazar.
+### **6️⃣ AI-Based Content Generation**
+- `AI: Generate Subject & Body`: Uses OpenAI API to generate a Turkish HTML email (80–120 words) with a subject line.  
+- `Merge AI + Tracking`: Embeds tracking links into the HTML content.  
+- `Send Email - Day 0`: Sends the email via Gmail.  
+- `Log Email Day 0`: Writes sending data to the `EmailLogs!A:D` sheet.
 
 ---
 
-## ⏳ Zaman Bazlı Devam Gönderimleri
+## ⏳ Time-Based Follow-Ups
 
-### **Day 2 (2 Gün Sonra)**
+### **Day 2 (After 2 Days)**
 - `Wait 2 Days` → `Set Type: Day 2` → `AI: Day 2 Content` → `Merge Day 2` → `Send Email - Day 2` → `Log Email Day 2`
 
-### **Day 5 (5 Gün Sonra)**
+### **Day 5 (After 5 Days)**
 - `Wait 3 More Days` → `Set Type: Day 5` → `AI: Day 5 Content` → `Merge Day 5` → `Send Email - Day 5` → `Log Email Day 5`
 
 ---
 
-## 📊 Takip & Analiz
+## 📊 Tracking & Analytics
 
-### **Açılma ve Tıklama Takibi**
-- `Webhook - Open` → `Log Open` → `OpenLogs!A:D`
+### **Open and Click Tracking**
+- `Webhook - Open` → `Log Open` → `OpenLogs!A:D`  
 - `Webhook - Click` → `Log Click` → `ClickLogs!A:E`
 
-Her e-postaya 1x1 piksel görünmez bir GIF eklenerek açılma kaydı alınır.  
-Tıklama linkleri yönlendirilmeden önce webhook üzerinden loglanır.
+Each email includes a 1×1 invisible GIF pixel for open tracking.  
+Click links are logged through a webhook before redirection.
 
 ---
 
-## 📈 Raporlama
+## 📈 Reporting
 
-- `Get Email Logs` ve `Get Click Logs` nodları, logları okur.
+- `Get Email Logs` and `Get Click Logs` nodes read the logs.  
 - `Calculate Stats (by messageType)`:
-  - Gönderilen e-posta sayısı  
-  - Tıklama sayısı  
-  - Tıklanma oranı (%)  
-  - En iyi performans gösteren mesaj tipi (`best_message`)
-- `Append Report`: Sonuçlar `Report!A:D` sayfasına eklenir.
+  - Number of emails sent  
+  - Number of clicks  
+  - Click-through rate (%)  
+  - Best-performing message type (`best_message`)  
+- `Append Report`: Appends results to the `Report!A:D` sheet.
 
-### 📋 Örnek Google Sheet Tablosu
-🔗 [Örnek Tablo (Google Sheets)](https://docs.google.com/spreadsheets/d/1Xu4a1L4Ot2eGeNiebp10nfzxAlR6aJMS6ufNzoxtHMM/edit?usp=sharing)
-
----
-
-## 📒 Sticky Notlar (README için n8n içinde görünür açıklamalar)
-
-| Node | Açıklama |
-|------|-----------|
-| **Fetch Leads** | `your_google_sheet_id` değerini değiştirmeyi unutmayın. |
-| **Build Tracking URLs** | `your-n8n-host` alanına kendi n8n URL’nizi ekleyin. |
-| **AI: Generate Subject & Body** | OpenAI kimliğini güncelleyin (`YOUR_OPENAI_CRED_ID`). |
-| **Send Email - Day 0/2/5** | Gmail OAuth2 kimliğini güncelleyin (`YOUR_GMAIL_CRED_ID`). |
-| **Google Sheets nodları** | Hepsi aynı kimliği kullanır (`YOUR_GOOGLE_SHEETS_CRED_ID`). |
-| **Webhook - Click / Open** | Bunlar public endpoint’lerdir; erişim için SSL kullanmanız önerilir. |
+### 📋 Example Google Sheet Table
+🔗 [Example Sheet (Google Sheets)](https://docs.google.com/spreadsheets/d/1Xu4a1L4Ot2eGeNiebp10nfzxAlR6aJMS6ufNzoxtHMM/edit?usp=sharing)
 
 ---
 
-## 🧠 Kullanılan Yapay Zeka Bileşenleri
+## 📒 Sticky Notes (Visible Comments in n8n README)
 
-- **Yapay Zeka Aracı:** ChatGPT  
-  Bu projede ChatGPT’yi özellikle **planlama aşamasında**, **öğrenme sürecinde** ve benzer JSON dosyalarını analiz etmede aktif olarak kullandım.  
-  Ayrıca bu README dosyasının hazırlanma sürecinde de destek aldım.
-
-- **OpenAI GPT (n8n-nodes-base.openAi):**
-  - Segment bazlı e-posta içeriği oluşturma  
-  - Kısa ve CTA odaklı HTML üretimi
-
-- **AI destekli analiz (function node):**
-  - En iyi performans gösteren e-posta tipini belirleme
+| Node | Description |
+|------|--------------|
+| **Fetch Leads** | Don’t forget to replace `your_google_sheet_id`. |
+| **Build Tracking URLs** | Add your own n8n URL in the `your-n8n-host` field. |
+| **AI: Generate Subject & Body** | Update your OpenAI credential ID (`YOUR_OPENAI_CRED_ID`). |
+| **Send Email - Day 0/2/5** | Update your Gmail OAuth2 credential ID (`YOUR_GMAIL_CRED_ID`). |
+| **Google Sheets nodes** | All use the same credential (`YOUR_GOOGLE_SHEETS_CRED_ID`). |
+| **Webhook - Click / Open** | These are public endpoints; SSL usage is recommended. |
 
 ---
 
-## 🎥 Öğrenme Kaynakları
+## 🧠 AI Components Used
 
-Bu projeyi hazırlamadan önce n8n platformunu daha iyi anlamak için şu videoları izledim:
+- **AI Tool:** ChatGPT  
+  Used during **planning**, **learning**, and **JSON structure analysis** phases.  
+  ChatGPT also assisted in preparing this README file.
 
-1. [📺 n8n ile Yapay Zeka Ajanları Kur ve Sat (5 Saatlik Eğitim – Sıfır Kodlama)](https://www.youtube.com/watch?v=PiOuEEBvY6A)  
-2. [📺 N8N ÜCRETSİZ HOST İLE SINIRSIZ KULLANMA](https://www.youtube.com/watch?v=WbH3GDBw13A)
+- **OpenAI GPT (n8n-nodes-base.openAi):**  
+  - Generates email content for each segment.  
+  - Produces short, CTA-focused HTML templates.
 
----
-
-## ✅ Kurulum Adımları
-
-1. `n8n-konusarak-ogren-mail-case.json` dosyasını n8n'e **Import Workflow** ile yükleyin.  
-2. `Credentials` sekmesinden:
-   - Google Sheets (OAuth2)
-   - Gmail (OAuth2)
-   - OpenAI API anahtarlarını ekleyin.
-3. Sticky notlarda belirtilen alanları (`your_google_sheet_id`, `your-n8n-host`) güncelleyin.
-4. Workflow’u **Active** hale getirin.
-5. Google Sheets üzerinde:
-   - **Leads**, **EmailLogs**, **ClickLogs**, **OpenLogs**, **Report** sayfalarını oluşturun.
-6. İlk tetikleme sonrasında sistem otomatik çalışmaya başlayacaktır.
+- **AI-Assisted Analysis (function node):**  
+  - Determines the best-performing email type.
 
 ---
 
-## 🧩 Beklenen Etki
+## 🎥 Learning Resources
 
-| Metrik | Önce | Sonra | Değişim |
-|--------|------|--------|----------|
-| Email hazırlama süresi | 10 dk | 2 dk | ⬇️ %80 |
-| Takip tutarlılığı | Düşük | Yüksek | ✅ |
-| Dönüşüm oranı | %5 | %6–7 | ⬆️ +%15–20 |
+Before building this project, I studied the n8n platform using these tutorials:
+
+1. [📺 Build and Sell AI Agents with n8n (5-Hour No-Code Course)](https://www.youtube.com/watch?v=PiOuEEBvY6A)  
+2. [📺 Use n8n with Free Hosting – Unlimited Usage](https://www.youtube.com/watch?v=WbH3GDBw13A)
 
 ---
 
-## 👤 Hazırlayan
+## ✅ Setup Steps
+
+1. Import the `n8n-konusarak-ogren-mail-case.json` file into n8n (**Import Workflow**).  
+2. From the **Credentials** tab, add:
+   - Google Sheets (OAuth2)  
+   - Gmail (OAuth2)  
+   - OpenAI API keys  
+3. Update placeholders in sticky notes (`your_google_sheet_id`, `your-n8n-host`).  
+4. Activate the workflow.  
+5. In Google Sheets, create sheets named:
+   - **Leads**, **EmailLogs**, **ClickLogs**, **OpenLogs**, **Report**  
+6. The system will start running automatically after the first trigger.
+
+---
+
+## 🧩 Expected Impact
+
+| Metric | Before | After | Change |
+|--------|---------|--------|---------|
+| Email preparation time | 10 min | 2 min | ⬇️ 80% |
+| Follow-up consistency | Low | High | ✅ |
+| Conversion rate | 5% | 6–7% | ⬆️ +15–20% |
+
+---
+
+## 👤 Author
 
 **Ömer Faruk Özer**  
-AI Growth Intern Case Study - Konuşarak Öğren  
+AI Growth Intern Case Study – Konuşarak Öğren  
 📧 ozeromerfaruk@gmail.com  
 🔗 [LinkedIn](https://www.linkedin.com/in/omerozerf/) | [GitHub](https://github.com/omerozerf)
