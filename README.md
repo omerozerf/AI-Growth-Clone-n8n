@@ -1,6 +1,6 @@
-# 📧 Konuşarak Öğren - Email Automation
+# 📧 Email Automation
 
-This project is an **AI Growth Internship Pre-Study** developed for **Konuşarak Öğren**, designed as an automated email follow-up system.  
+This project is an **AI Growth Clone** developed designed as an automated email follow-up system.  
 The system is built entirely with **n8n**, **Google Sheets**, **Gmail**, and **OpenAI** integrations.
 
 ---
@@ -146,6 +146,5 @@ Before building this project, I studied the n8n platform using these tutorials:
 ## 👤 Author
 
 **Ömer Faruk Özer**  
-AI Growth Intern Case Study – Konuşarak Öğren  
-📧 ozeromerfaruk@gmail.com  
+AI Growth Clone ozeromerfaruk@gmail.com  
 🔗 [LinkedIn](https://www.linkedin.com/in/omerozerf/) | [GitHub](https://github.com/omerozerf)
